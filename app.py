@@ -4,12 +4,16 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_examen_2025'
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'database.db')
 # ── Base de datos ──────────────────────────────────────────
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'database.db')
+
 def get_db():
-    db = sqlite3.connect('database.db')
-    db.row_factory = sqlite3.Row
-    return db
+    db = sqlite3.connect(DB_PATH)
 
 def init_db():
     db = get_db()
