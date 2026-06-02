@@ -107,6 +107,9 @@ def logout():
     return redirect(url_for('login'))
 
 # ── Inicio ─────────────────────────────────────────────────
-if __name__ == '__main__':
+# Inicializar la base de datos siempre al arrancar
+with app.app_context():
     init_db()
+
+if __name__ == '__main__':
     app.run(debug=True)
