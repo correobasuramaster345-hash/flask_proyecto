@@ -4,19 +4,19 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_examen_2025'
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'database.db')
+
 # ── Base de datos ──────────────────────────────────────────
-import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'database.db')
-
 def get_db():
     db = sqlite3.connect(DB_PATH)
+    db.row_factory = sqlite3.Row
+    return db
 
 def init_db():
-    db = get_db()
+    db = sqlite3.connect(DB_PATH)
+    db.row_factory = sqlite3.Row
     db.execute('''CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL,
@@ -32,7 +32,6 @@ def init_db():
         stock INTEGER,
         categoria TEXT
     )''')
-    # Insertar datos de prueba si las tablas están vacías
     if not db.execute('SELECT * FROM usuarios').fetchone():
         db.execute("INSERT INTO usuarios (username, password, nombre) VALUES ('admin', '1234', 'Administrador')")
         db.execute("INSERT INTO usuarios (username, password, nombre) VALUES ('usuario1', 'abcd', 'Juan Pérez')")
@@ -47,6 +46,9 @@ def init_db():
         db.executemany("INSERT INTO productos (codigo, nombre, descripcion, precio, stock, categoria) VALUES (?,?,?,?,?,?)", productos)
     db.commit()
     db.close()
+
+# Inicializar DB al arrancar
+init_db()
 
 # ── Rutas ──────────────────────────────────────────────────
 @app.route('/')
@@ -105,11 +107,6 @@ def buscar_producto():
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
-# ── Inicio ─────────────────────────────────────────────────
-# Inicializar la base de datos siempre al arrancar
-with app.app_context():
-    init_db()
 
 if __name__ == '__main__':
     app.run(debug=True)
