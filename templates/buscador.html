@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscador de Productos</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f4f6f9; }
+        .navbar {
+            background: #1976d2; color: white;
+            padding: 16px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .navbar h1 { font-size: 20px; }
+        .navbar a {
+            color: white; text-decoration: none;
+            background: #d32f2f; padding: 8px 16px;
+            border-radius: 6px; font-size: 14px;
+        }
+        .contenido {
+            max-width: 600px; margin: 50px auto;
+            background: white; padding: 36px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+        }
+        h2 { color: #1976d2; margin-bottom: 24px; text-align: center; }
+        .buscador-grupo { display: flex; gap: 10px; margin-bottom: 24px; }
+        input {
+            flex: 1; padding: 10px 14px;
+            border: 1px solid #ccc; border-radius: 8px; font-size: 15px;
+        }
+        .btn-buscar {
+            padding: 10px 22px; background: #1976d2;
+            color: white; border: none; border-radius: 8px;
+            font-size: 15px; cursor: pointer;
+        }
+        .btn-buscar:hover { background: #125ea7; }
+        .resultado {
+            background: #f8f9fa; border-radius: 10px;
+            padding: 20px; margin-top: 10px; display: none;
+        }
+        .resultado h3 { color: #1976d2; margin-bottom: 14px; }
+        .campo { margin-bottom: 10px; font-size: 15px; }
+        .campo strong { color: #333; }
+        .no-encontrado { color: #d32f2f; text-align: center; font-weight: bold; }
+        .botones { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-regresar {
+            flex: 1; padding: 11px; background: #6c757d;
+            color: white; border: none; border-radius: 8px;
+            font-size: 15px; cursor: pointer; text-align: center;
+            text-decoration: none; display: block;
+        }
+        .btn-regresar:hover { background: #545b62; }
+        .btn-salir {
+            flex: 1; padding: 11px; background: #d32f2f;
+            color: white; border: none; border-radius: 8px;
+            font-size: 15px; cursor: pointer; text-align: center;
+            text-decoration: none; display: block;
+        }
+        .btn-salir:hover { background: #b71c1c; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🔍 Buscador de Productos</h1>
+        <a href="/logout">🚪 Salir del sistema</a>
+    </div>
+    <div class="contenido">
+        <h2>Buscar Producto por Código</h2>
+        <div class="buscador-grupo">
+            <input type="text" id="codigo" placeholder="Ej: P001, P002, P003...">
+            <button class="btn-buscar" onclick="buscar()">Buscar</button>
+        </div>
+        <div class="resultado" id="resultado"></div>
+        <div class="botones">
+            <a href="/principal" class="btn-regresar">⬅️ Regresar al Panel</a>
+            <a href="/logout" class="btn-salir">🚪 Salir del Sistema</a>
+        </div>
+    </div>
+    <script>
+        async function buscar() {
+            const codigo = document.getElementById('codigo').value.trim();
+            if (!codigo) {
+                alert('Por favor ingrese un código de producto');
+                return;
+            }
+            const res = await fetch('/api/buscar_producto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ codigo: codigo })
+            });
+            const data = await res.json();
+            const div = document.getElementById('resultado');
+            div.style.display = 'block';
+            if (data.encontrado) {
+                div.innerHTML = `
+                    <h3>✅ Producto encontrado</h3>
+                    <div class="campo"><strong>Código:</strong> ${data.codigo}</div>
+                    <div class="campo"><strong>Nombre:</strong> ${data.nombre}</div>
+                    <div class="campo"><strong>Descripción:</strong> ${data.descripcion}</div>
+                    <div class="campo"><strong>Precio:</strong> S/ ${data.precio.toFixed(2)}</div>
+                    <div class="campo"><strong>Stock:</strong> ${data.stock} unidades</div>
+                    <div class="campo"><strong>Categoría:</strong> ${data.categoria}</div>
+                `;
+            } else {
+                div.innerHTML = `<p class="no-encontrado">❌ Producto no encontrado. Intente con P001, P002, P003, P004 o P005.</p>`;
+            }
+        }
+        document.getElementById('codigo').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') buscar();
+        });
+    </script>
+</body>
+</html>
